@@ -43,8 +43,39 @@ Ex. 4.1: Empty model for language scores in elementary schools
 -------------------------------------------------------------------------------
 
 
+```r
+m_1 <- lmer(langPOST ~ 1 + (1 | schoolnr), d, REML = FALSE)
+summary(m_1)
+```
+
+```
+## Linear mixed model fit by maximum likelihood ['lmerMod']
+## Formula: langPOST ~ 1 + (1 | schoolnr) 
+##    Data: d 
+## 
+##      AIC      BIC   logLik deviance 
+##    26601    26620   -13298    26595 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  schoolnr (Intercept) 18.1     4.26    
+##  Residual             62.9     7.93    
+## Number of obs: 3758, groups: schoolnr, 211
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)   41.005      0.325     126
+```
+
+
+> For the overall distribution of the language scores, these estimates provide a mean of 41.00 and a standard deviation of 9.00 = `sqrt(18.12 + 62.85)` [i.e., the square-root of the variances in the random effects]. The mean of 41.00 should be interpreted as the expected value of the language score for a random pupil in a randomly drawn class. This is close, but not identical, to the raw mean 41.41. (p. 51)
+
+
 Ex. 4.2: Random intercept and one explanatory variable (IQ)
 -------------------------------------------------------------------------------
+
+> The random variables <em>U</em><sub>0<em>j</em></sub> can be regarded as residuals are the group level, or group effects that are left unexplained by _X_. Since residuals, or random errors, contain those parts of the variability of the dependent variable that are not modeled explicitly as a function of explanatory variables, this model contains unexplained variability at two nested levels. This partition of unexplained variability over the various levels is the essense of hierarchical random effects models. (p. 51)
+
 
 
 Ex. 4.3: Within- and between-group regressions for IQ
@@ -57,16 +88,12 @@ summary(m_3a)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood  ['lmerMod']
-## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr)
-##    Data: d
+## Linear mixed model fit by maximum likelihood ['lmerMod']
+## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr) 
+##    Data: d 
 ## 
-##      AIC      BIC   logLik deviance df.resid 
-##    24898    24929   -12444    24888     3753 
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -4.222 -0.641  0.063  0.706  3.219 
+##      AIC      BIC   logLik deviance 
+##    24898    24929   -12444    24888 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -87,7 +114,7 @@ summary(m_3a)
 ```
 
 
-> Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for _U_<sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + _U_<sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
+> Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for <em>U</em><sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + <em>U</em><sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
 
 ### Within-group centering
 
@@ -99,16 +126,12 @@ summary(m_3b)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood  ['lmerMod']
-## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr)
-##    Data: d
+## Linear mixed model fit by maximum likelihood ['lmerMod']
+## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr) 
+##    Data: d 
 ## 
-##      AIC      BIC   logLik deviance df.resid 
-##    24898    24929   -12444    24888     3753 
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -4.222 -0.641  0.063  0.706  3.219 
+##      AIC      BIC   logLik deviance 
+##    24898    24929   -12444    24888 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -165,14 +188,13 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.1.3    lme4_1.1-5     Rcpp_0.11.1    Matrix_1.1-2-2
-## [5] knitr_1.5     
+## [1] dplyr_0.1.2     lme4_1.0-6      Matrix_1.1-2-2  lattice_0.20-27
+## [5] knitr_1.5      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] assertthat_0.1      evaluate_0.5.1      formatR_0.10       
-##  [4] grid_3.0.2          lattice_0.20-27     MASS_7.3-29        
-##  [7] minqa_1.2.3         nlme_3.1-111        RcppEigen_0.3.2.1.1
-## [10] splines_3.0.2       stringr_0.6.2       tools_3.0.2
+##  [1] assertthat_0.1 evaluate_0.5.1 formatR_0.10   grid_3.0.2    
+##  [5] MASS_7.3-29    minqa_1.2.3    nlme_3.1-111   Rcpp_0.11.0   
+##  [9] splines_3.0.2  stringr_0.6.2  tools_3.0.2
 ```
 
 ```r
@@ -180,7 +202,7 @@ date()
 ```
 
 ```
-## [1] "Tue Mar 25 13:52:23 2014"
+## [1] "Tue Mar 25 14:24:17 2014"
 ```
 
 

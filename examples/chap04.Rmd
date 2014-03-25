@@ -25,9 +25,19 @@ str(d)
 Ex. 4.1: Empty model for language scores in elementary schools
 -------------------------------------------------------------------------------
 
+```{r}
+m_1 <- lmer(langPOST ~ 1 + (1 | schoolnr), d, REML = FALSE)
+summary(m_1)
+```
+
+> For the overall distribution of the language scores, these estimates provide a mean of 41.00 and a standard deviation of 9.00 = `sqrt(18.12 + 62.85)` [i.e., the square-root of the variances in the random effects]. The mean of 41.00 should be interpreted as the expected value of the language score for a random pupil in a randomly drawn class. This is close, but not identical, to the raw mean 41.41. (p. 51)
+
 
 Ex. 4.2: Random intercept and one explanatory variable (IQ)
 -------------------------------------------------------------------------------
+
+> The random variables <em>U</em><sub>0<em>j</em></sub> can be regarded as residuals are the group level, or group effects that are left unexplained by _X_. Since residuals, or random errors, contain those parts of the variability of the dependent variable that are not modeled explicitly as a function of explanatory variables, this model contains unexplained variability at two nested levels. This partition of unexplained variability over the various levels is the essense of hierarchical random effects models. (p. 51)
+
 
 
 Ex. 4.3: Within- and between-group regressions for IQ
@@ -38,7 +48,7 @@ m_3a <- lmer(langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr), d, REML = FALSE)
 summary(m_3a)
 ```
 
-> Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for _U_<sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + _U_<sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
+> Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for <em>U</em><sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + <em>U</em><sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
 
 ### Within-group centering
 
