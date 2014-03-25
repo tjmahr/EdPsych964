@@ -1,4 +1,4 @@
-Chapter 4
+Chapter 4: The Random Intercept Model
 ===============================================================================
 
 ```{r Preliminaries, message = FALSE, warning = FALSE, tidy = FALSE}
@@ -22,15 +22,15 @@ str(d)
 ```
 
 
-Example 4.1
+Ex. 4.1: Empty model for language scores in elementary schools
 -------------------------------------------------------------------------------
 
 
-Example 4.2
+Ex. 4.2: Random intercept and one explanatory variable (IQ)
 -------------------------------------------------------------------------------
 
 
-Example 4.3: Within- and between-group regressions for IQ
+Ex. 4.3: Within- and between-group regressions for IQ
 -------------------------------------------------------------------------------
 
 ```{r}
@@ -38,7 +38,7 @@ m_3a <- lmer(langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr), d, REML = FALSE)
 summary(m_3a)
 ```
 
-> Classes differ in two ways: they mave have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for _U_<sub>0_j_</sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + _U_<sub>0_j_</sub> + 1.312 * `sch_iqv`.
+> Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for _U_<sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + _U_<sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
 
 ### Within-group centering
 
@@ -58,4 +58,10 @@ The within-group effect is `r fixef2(m_3b, "dev_iqv")`. The between-group effect
 
 
 
+*** 
+
+```{r}
+sessionInfo()
+date()
+```
 

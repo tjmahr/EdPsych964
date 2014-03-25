@@ -1,4 +1,4 @@
-Chapter 4
+Chapter 4: The Random Intercept Model
 ===============================================================================
 
 
@@ -39,15 +39,15 @@ str(d)
 
 
 
-Example 4.1
+Ex. 4.1: Empty model for language scores in elementary schools
 -------------------------------------------------------------------------------
 
 
-Example 4.2
+Ex. 4.2: Random intercept and one explanatory variable (IQ)
 -------------------------------------------------------------------------------
 
 
-Example 4.3: Within- and between-group regressions for IQ
+Ex. 4.3: Within- and between-group regressions for IQ
 -------------------------------------------------------------------------------
 
 
@@ -87,7 +87,7 @@ summary(m_3a)
 ```
 
 
-> Classes differ in two ways: they mave have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for _U_<sub>0_j_</sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + _U_<sub>0_j_</sub> + 1.312 * `sch_iqv`.
+> Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for _U_<sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + _U_<sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
 
 ### Within-group centering
 
@@ -142,5 +142,45 @@ The within-group effect is 2.45. The between-group effect is 3.77. The advantage
 
 
 
+
+*** 
+
+
+```r
+sessionInfo()
+```
+
+```
+## R version 3.0.2 (2013-09-25)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] dplyr_0.1.3    lme4_1.1-5     Rcpp_0.11.1    Matrix_1.1-2-2
+## [5] knitr_1.5     
+## 
+## loaded via a namespace (and not attached):
+##  [1] assertthat_0.1      evaluate_0.5.1      formatR_0.10       
+##  [4] grid_3.0.2          lattice_0.20-27     MASS_7.3-29        
+##  [7] minqa_1.2.3         nlme_3.1-111        RcppEigen_0.3.2.1.1
+## [10] splines_3.0.2       stringr_0.6.2       tools_3.0.2
+```
+
+```r
+date()
+```
+
+```
+## [1] "Tue Mar 25 13:52:23 2014"
+```
 
 
