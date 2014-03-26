@@ -49,12 +49,16 @@ summary(m_1)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood ['lmerMod']
-## Formula: langPOST ~ 1 + (1 | schoolnr) 
-##    Data: d 
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ 1 + (1 | schoolnr)
+##    Data: d
 ## 
-##      AIC      BIC   logLik deviance 
-##    26601    26620   -13298    26595 
+##      AIC      BIC   logLik deviance df.resid 
+##    26601    26620   -13298    26595     3755 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.185 -0.642  0.091  0.723  2.528 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -68,13 +72,87 @@ summary(m_1)
 ```
 
 
-> For the overall distribution of the language scores, these estimates provide a mean of 41.00 and a standard deviation of 9.00 = `sqrt(18.12 + 62.85)` [i.e., the square-root of the variances in the random effects]. The mean of 41.00 should be interpreted as the expected value of the language score for a random pupil in a randomly drawn class. This is close, but not identical, to the raw mean 41.41. (p. 51)
+> For the overall distribution of the language scores, these estimates provide a mean of 41.00 and a standard deviation of 9.00 = `sqrt(18.12 + 62.85)` [i.e., the square-root of the variances in the random effects]. The mean of 41.00 should be interpreted as the expected value of the language score for a random pupil in a randomly drawn class. This is close, but not identical, to the raw mean 41.41 and standard deviation 8.89. (p. 51)
 
 
 Ex. 4.2: Random intercept and one explanatory variable (IQ)
 -------------------------------------------------------------------------------
 
 > The random variables <em>U</em><sub>0<em>j</em></sub> can be regarded as residuals are the group level, or group effects that are left unexplained by _X_. Since residuals, or random errors, contain those parts of the variability of the dependent variable that are not modeled explicitly as a function of explanatory variables, this model contains unexplained variability at two nested levels. This partition of unexplained variability over the various levels is the essense of hierarchical random effects models. (p. 51)
+
+
+```r
+m_2 <- lmer(langPOST ~ IQ_verb + (1 | schoolnr), d, REML = FALSE)
+summary(m_2)
+```
+
+```
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ IQ_verb + (1 | schoolnr)
+##    Data: d
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    24920    24945   -12456    24912     3754 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.196 -0.639  0.066  0.710  3.214 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  schoolnr (Intercept)  9.85    3.14    
+##  Residual             40.47    6.36    
+## Number of obs: 3758, groups: schoolnr, 211
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)  41.0549     0.2434   168.7
+## IQ_verb       2.5074     0.0544    46.1
+## 
+## Correlation of Fixed Effects:
+##         (Intr)
+## IQ_verb 0.003
+```
+
+```r
+# Get the standard deviation of the random (class-dependent) intercepts
+sd_U0j <- attr(VarCorr(m_2)[["schoolnr"]], "stddev")
+sd_U0j <- as.numeric(round(sd_U0j, 2))
+sd_U0j
+```
+
+```
+## [1] 3.14
+```
+
+```r
+fixed_intercept <- round(fixef(m_2)[["(Intercept)"]], 2)
+# Adjusted intercept for a high-achieving (+2SD) class
+fixed_intercept + 2 * sd_U0j
+```
+
+```
+## [1] 47.33
+```
+
+```r
+# Adjusted intercept for a low-achieving (-2SD) class
+fixed_intercept - 2 * sd_U0j
+```
+
+```
+## [1] 34.77
+```
+
+```r
+# Expect residual intraclass correlation = 0.20
+varcomp(m_2)$ICC
+```
+
+```
+## schoolnr.(Intercept) 
+##               0.1957
+```
 
 
 
@@ -88,12 +166,16 @@ summary(m_3a)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood ['lmerMod']
-## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr) 
-##    Data: d 
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr)
+##    Data: d
 ## 
-##      AIC      BIC   logLik deviance 
-##    24898    24929   -12444    24888 
+##      AIC      BIC   logLik deviance df.resid 
+##    24898    24929   -12444    24888     3753 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.222 -0.641  0.063  0.706  3.219 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -126,12 +208,16 @@ summary(m_3b)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood ['lmerMod']
-## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr) 
-##    Data: d 
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr)
+##    Data: d
 ## 
-##      AIC      BIC   logLik deviance 
-##    24898    24929   -12444    24888 
+##      AIC      BIC   logLik deviance df.resid 
+##    24898    24929   -12444    24888     3753 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.222 -0.641  0.063  0.706  3.219 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -165,7 +251,6 @@ The within-group effect is 2.45. The between-group effect is 3.77. The advantage
 
 
 
-
 *** 
 
 
@@ -188,13 +273,14 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.1.2     lme4_1.0-6      Matrix_1.1-2-2  lattice_0.20-27
-## [5] knitr_1.5      
+## [1] dplyr_0.1.3    lme4_1.1-5     Rcpp_0.11.1    Matrix_1.1-2-2
+## [5] knitr_1.5     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] assertthat_0.1 evaluate_0.5.1 formatR_0.10   grid_3.0.2    
-##  [5] MASS_7.3-29    minqa_1.2.3    nlme_3.1-111   Rcpp_0.11.0   
-##  [9] splines_3.0.2  stringr_0.6.2  tools_3.0.2
+##  [1] assertthat_0.1      evaluate_0.5.1      formatR_0.10       
+##  [4] grid_3.0.2          lattice_0.20-27     MASS_7.3-29        
+##  [7] minqa_1.2.3         nlme_3.1-111        RcppEigen_0.3.2.1.1
+## [10] splines_3.0.2       stringr_0.6.2       tools_3.0.2
 ```
 
 ```r
@@ -202,7 +288,7 @@ date()
 ```
 
 ```
-## [1] "Tue Mar 25 14:24:17 2014"
+## [1] "Wed Mar 26 09:00:49 2014"
 ```
 
 

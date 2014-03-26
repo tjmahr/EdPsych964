@@ -30,7 +30,7 @@ m_1 <- lmer(langPOST ~ 1 + (1 | schoolnr), d, REML = FALSE)
 summary(m_1)
 ```
 
-> For the overall distribution of the language scores, these estimates provide a mean of 41.00 and a standard deviation of 9.00 = `sqrt(18.12 + 62.85)` [i.e., the square-root of the variances in the random effects]. The mean of 41.00 should be interpreted as the expected value of the language score for a random pupil in a randomly drawn class. This is close, but not identical, to the raw mean 41.41. (p. 51)
+> For the overall distribution of the language scores, these estimates provide a mean of 41.00 and a standard deviation of 9.00 = `sqrt(18.12 + 62.85)` [i.e., the square-root of the variances in the random effects]. The mean of 41.00 should be interpreted as the expected value of the language score for a random pupil in a randomly drawn class. This is close, but not identical, to the raw mean 41.41 and standard deviation 8.89. (p. 51)
 
 
 Ex. 4.2: Random intercept and one explanatory variable (IQ)
@@ -38,6 +38,21 @@ Ex. 4.2: Random intercept and one explanatory variable (IQ)
 
 > The random variables <em>U</em><sub>0<em>j</em></sub> can be regarded as residuals are the group level, or group effects that are left unexplained by _X_. Since residuals, or random errors, contain those parts of the variability of the dependent variable that are not modeled explicitly as a function of explanatory variables, this model contains unexplained variability at two nested levels. This partition of unexplained variability over the various levels is the essense of hierarchical random effects models. (p. 51)
 
+```{r}
+m_2 <- lmer(langPOST ~ IQ_verb + (1 | schoolnr), d, REML = FALSE)
+summary(m_2)
+# Get the standard deviation of the random (class-dependent) intercepts
+sd_U0j <- attr(VarCorr(m_2)[["schoolnr"]], "stddev")
+sd_U0j <- as.numeric(round(sd_U0j, 2))
+sd_U0j
+fixed_intercept <- round(fixef(m_2)[["(Intercept)"]], 2)
+# Adjusted intercept for a high-achieving (+2SD) class
+fixed_intercept + 2 * sd_U0j
+# Adjusted intercept for a low-achieving (-2SD) class
+fixed_intercept - 2 * sd_U0j
+# Expect residual intraclass correlation = 0.20
+varcomp(m_2)$ICC
+```
 
 
 Ex. 4.3: Within- and between-group regressions for IQ
@@ -61,7 +76,6 @@ m_3c <- lmer(langPOST ~ I(IQ_verb - sch_iqv) + sch_iqv + (1 | schoolnr), d, REML
 ```
 
 The within-group effect is `r fixef2(m_3b, "dev_iqv")`. The between-group effect is `r fixef2(m_3b, "sch_iqv")`. The advantage of within-group centering is that the within-group regression coefficient is now conveniently expressed in the model's fixed effects.
-
 
 
 
