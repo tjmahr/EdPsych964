@@ -159,6 +159,9 @@ varcomp(m_2)$ICC
 Ex. 4.3: Within- and between-group regressions for IQ
 -------------------------------------------------------------------------------
 
+> The within-group regression coefficient expresses the effect of the explanatory variable within a given group; the between-group regression coefficient expresses the effect of the group mean of the explanatory variable on the group mean of the dependent variable. (p. 56)
+
+
 
 ```r
 m_3a <- lmer(langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr), d, REML = FALSE)
@@ -288,7 +291,7 @@ date()
 ```
 
 ```
-## [1] "Wed Mar 26 09:00:49 2014"
+## [1] "Wed Mar 26 12:09:31 2014"
 ```
 
 
