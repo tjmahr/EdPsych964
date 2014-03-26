@@ -3,6 +3,7 @@ Chapter 4: The Random Intercept Model
 
 ```{r Preliminaries, message = FALSE, warning = FALSE, tidy = FALSE}
 library(lme4)
+library(ggplot2)
 library(dplyr)
 
 varcomp <- function(obj) {
@@ -16,7 +17,7 @@ varcomp <- function(obj) {
 # Access and pretty print a fixed effect coefficient
 fixef2 <- function(model, variable) round(fixef(model)[variable], 2)
 
-# Downloaded from http://www.stats.ox.ac.uk/~snijders/mlbook.htm
+# Load data
 d <- read.table("mlbook2_r.dat", header = TRUE)
 str(d)
 ```
@@ -60,11 +61,16 @@ Ex. 4.3: Within- and between-group regressions for IQ
 
 > The within-group regression coefficient expresses the effect of the explanatory variable within a given group; the between-group regression coefficient expresses the effect of the group mean of the explanatory variable on the group mean of the dependent variable. (p. 56)
 
-
 ```{r}
 m_3a <- lmer(langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr), d, REML = FALSE)
 summary(m_3a)
 ```
+
+The within-group effect is the fixed effect of IQ on language, _b_ = `r fixef2(m_3a, "IQ_verb")`. The between-group effect is the sum of the parameters, _b_ = `r fixef2(m_3a, "IQ_verb")` + `r fixef2(m_3a, "sch_iqv")` = `r fixef2(m_3a, "IQ_verb") + fixef2(m_3a, "sch_iqv")`. 
+
+> The contextual effect of mean IQ in the class gives an additional contribution over and above the effect of individual IQ. (p. 58) 
+
+The _t_ statistic for the contextual effect tests the null hypothesis that the between-group effect equals 0 (and therefore that there is no difference between within-group and between-group coefficients).
 
 > Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for <em>U</em><sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + <em>U</em><sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
 
@@ -78,10 +84,53 @@ summary(m_3b)
 m_3c <- lmer(langPOST ~ I(IQ_verb - sch_iqv) + sch_iqv + (1 | schoolnr), d, REML = FALSE)
 ```
 
-The within-group effect is `r fixef2(m_3b, "dev_iqv")`. The between-group effect is `r fixef2(m_3b, "sch_iqv")`. The advantage of within-group centering is that the within-group regression coefficient is now conveniently expressed in the model's fixed effects.
+The advantage of within-group centering is that the within-group regression coefficient is now conveniently expressed in the model's fixed effects, _b_ = `r fixef2(m_3b, "sch_iqv")`.
 
 
+Ex. 4.6: Comparing added value of schools
+-------------------------------------------------------------------------------
 
+```{r}
+# Extract posterior means and variances
+random <- ranef(m_3a, condVar = TRUE, drop = TRUE)
+random <- random[["schoolnr"]]
+post_mean <- as.numeric(random)
+post_var <- attr(random, 'postVar')
+
+# Generate comparative intervals from comparative SD
+comp_sd <- sqrt(post_var)
+ci_level <- comp_sd * 1.39
+
+# Dump into a data-frame
+emp_bayes <- data.frame(ID = names(random), PostMean = post_mean, 
+                        PostVar = post_var, Lower = post_mean - ci_level, 
+                        Upper = post_mean + ci_level)
+emp_bayes <- arrange(emp_bayes, PostMean, Lower, Upper)
+head(emp_bayes)
+
+## Catepillar plots
+
+# Fast way to make a catepillar plot
+dotplot(ranef(m_3a, condVar = TRUE))
+# Plot the estimates collected in the data-frame
+ggplot(emp_bayes, aes(x = seq_len(nrow(emp_bayes)), y = PostMean)) + 
+  geom_errorbar(aes(ymin = Lower, ymax = Upper)) + geom_point() + 
+  labs(x = NULL, y = "Posterior Mean") + 
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + 
+  scale_x_continuous(breaks = NULL)
+## Count how many schools overlap with the lowest and highest schools
+lower_bound_of_max <- emp_bayes[which.max(emp_bayes$PostMean), "Lower"]
+upper_bound_of_min <- emp_bayes[which.min(emp_bayes$PostMean), "Upper"]
+
+# Subtract one because the highest/lowest schools overlap with themselves
+sum(lower_bound_of_max <= emp_bayes$Upper) - 1
+sum(emp_bayes$Lower <= upper_bound_of_min) - 1
+# These counts do not match the textbook...
+```
+
+```{r}
+
+```
 
 
 

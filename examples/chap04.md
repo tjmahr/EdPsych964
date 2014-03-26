@@ -4,6 +4,7 @@ Chapter 4: The Random Intercept Model
 
 ```r
 library(lme4)
+library(ggplot2)
 library(dplyr)
 
 varcomp <- function(obj) {
@@ -17,7 +18,7 @@ varcomp <- function(obj) {
 # Access and pretty print a fixed effect coefficient
 fixef2 <- function(model, variable) round(fixef(model)[variable], 2)
 
-# Downloaded from http://www.stats.ox.ac.uk/~snijders/mlbook.htm
+# Load data
 d <- read.table("mlbook2_r.dat", header = TRUE)
 str(d)
 ```
@@ -49,16 +50,12 @@ summary(m_1)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood  ['lmerMod']
-## Formula: langPOST ~ 1 + (1 | schoolnr)
-##    Data: d
+## Linear mixed model fit by maximum likelihood ['lmerMod']
+## Formula: langPOST ~ 1 + (1 | schoolnr) 
+##    Data: d 
 ## 
-##      AIC      BIC   logLik deviance df.resid 
-##    26601    26620   -13298    26595     3755 
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -4.185 -0.642  0.091  0.723  2.528 
+##      AIC      BIC   logLik deviance 
+##    26601    26620   -13298    26595 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -87,16 +84,12 @@ summary(m_2)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood  ['lmerMod']
-## Formula: langPOST ~ IQ_verb + (1 | schoolnr)
-##    Data: d
+## Linear mixed model fit by maximum likelihood ['lmerMod']
+## Formula: langPOST ~ IQ_verb + (1 | schoolnr) 
+##    Data: d 
 ## 
-##      AIC      BIC   logLik deviance df.resid 
-##    24920    24945   -12456    24912     3754 
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -4.196 -0.639  0.066  0.710  3.214 
+##      AIC      BIC   logLik deviance 
+##    24920    24945   -12456    24912 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -162,23 +155,18 @@ Ex. 4.3: Within- and between-group regressions for IQ
 > The within-group regression coefficient expresses the effect of the explanatory variable within a given group; the between-group regression coefficient expresses the effect of the group mean of the explanatory variable on the group mean of the dependent variable. (p. 56)
 
 
-
 ```r
 m_3a <- lmer(langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr), d, REML = FALSE)
 summary(m_3a)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood  ['lmerMod']
-## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr)
-##    Data: d
+## Linear mixed model fit by maximum likelihood ['lmerMod']
+## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr) 
+##    Data: d 
 ## 
-##      AIC      BIC   logLik deviance df.resid 
-##    24898    24929   -12444    24888     3753 
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -4.222 -0.641  0.063  0.706  3.219 
+##      AIC      BIC   logLik deviance 
+##    24898    24929   -12444    24888 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -199,6 +187,12 @@ summary(m_3a)
 ```
 
 
+The within-group effect is the fixed effect of IQ on language, _b_ = 2.45. The between-group effect is the sum of the parameters, _b_ = 2.45 + 1.31 = 3.76. 
+
+> The contextual effect of mean IQ in the class gives an additional contribution over and above the effect of individual IQ. (p. 58) 
+
+The _t_ statistic for the contextual effect tests the null hypothesis that the between-group effect equals 0 (and therefore that there is no difference between within-group and between-group coefficients).
+
 > Classes differ in two ways: they may have different mean IQ values, whichs affects the expected results _Y_ through the term 1.312 * `sch_iqv` [i.e., mean IQ in class _j_]; this is an explained difference between the classes; and they have randomly differing values for <em>U</em><sub>0<em>j</em></sub>, which is an unexplained difference. These two ingredients contribute to the class-dependent intercept, given by 41.11 + <em>U</em><sub>0<em>j</em></sub> + 1.312 * `sch_iqv`. (p. 59)
 
 ### Within-group centering
@@ -211,16 +205,12 @@ summary(m_3b)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood  ['lmerMod']
-## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr)
-##    Data: d
+## Linear mixed model fit by maximum likelihood ['lmerMod']
+## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr) 
+##    Data: d 
 ## 
-##      AIC      BIC   logLik deviance df.resid 
-##    24898    24929   -12444    24888     3753 
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -4.222 -0.641  0.063  0.706  3.219 
+##      AIC      BIC   logLik deviance 
+##    24898    24929   -12444    24888 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -247,7 +237,89 @@ m_3c <- lmer(langPOST ~ I(IQ_verb - sch_iqv) + sch_iqv + (1 | schoolnr), d,
 ```
 
 
-The within-group effect is 2.45. The between-group effect is 3.77. The advantage of within-group centering is that the within-group regression coefficient is now conveniently expressed in the model's fixed effects.
+The advantage of within-group centering is that the within-group regression coefficient is now conveniently expressed in the model's fixed effects, _b_ = 3.77.
+
+
+Ex. 4.6: Comparing added value of schools
+-------------------------------------------------------------------------------
+
+
+```r
+# Extract posterior means and variances
+random <- ranef(m_3a, condVar = TRUE, drop = TRUE)
+random <- random[["schoolnr"]]
+post_mean <- as.numeric(random)
+post_var <- attr(random, "postVar")
+
+# Generate comparative intervals from comparative SD
+comp_sd <- sqrt(post_var)
+ci_level <- comp_sd * 1.39
+
+# Dump into a data-frame
+emp_bayes <- data.frame(ID = names(random), PostMean = post_mean, PostVar = post_var, 
+    Lower = post_mean - ci_level, Upper = post_mean + ci_level)
+emp_bayes <- arrange(emp_bayes, PostMean, Lower, Upper)
+head(emp_bayes)
+```
+
+```
+##    ID PostMean PostVar  Lower  Upper
+## 1  14   -6.717  0.2861 -7.461 -5.974
+## 2  18   -6.470  0.2293 -7.135 -5.804
+## 3  67   -5.888  0.2004 -6.510 -5.266
+## 4 107   -5.761  0.4015 -6.641 -4.880
+## 5  15   -5.317  1.1753 -6.823 -3.810
+## 6 232   -4.996  1.6579 -6.785 -3.206
+```
+
+```r
+
+## Catepillar plots
+
+# Fast way to make a catepillar plot
+dotplot(ranef(m_3a, condVar = TRUE))
+```
+
+```
+## $schoolnr
+```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-51.png) 
+
+```r
+# Plot the estimates collected in the data-frame
+ggplot(emp_bayes, aes(x = seq_len(nrow(emp_bayes)), y = PostMean)) + geom_errorbar(aes(ymin = Lower, 
+    ymax = Upper)) + geom_point() + labs(x = NULL, y = "Posterior Mean") + theme(axis.ticks.x = element_blank(), 
+    axis.text.x = element_blank()) + scale_x_continuous(breaks = NULL)
+```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-52.png) 
+
+```r
+## Count how many schools overlap with the lowest and highest schools
+lower_bound_of_max <- emp_bayes[which.max(emp_bayes$PostMean), "Lower"]
+upper_bound_of_min <- emp_bayes[which.min(emp_bayes$PostMean), "Upper"]
+
+# Subtract one because the highest/lowest schools overlap with themselves
+sum(lower_bound_of_max <= emp_bayes$Upper) - 1
+```
+
+```
+## [1] 7
+```
+
+```r
+sum(emp_bayes$Lower <= upper_bound_of_min) - 1
+```
+
+```
+## [1] 8
+```
+
+```r
+# These counts do not match the textbook...
+```
+
 
 
 
@@ -276,14 +348,18 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.1.3    lme4_1.1-5     Rcpp_0.11.1    Matrix_1.1-2-2
-## [5] knitr_1.5     
+## [1] dplyr_0.1.2     ggplot2_0.9.3.1 lme4_1.0-6      Matrix_1.1-2-2 
+## [5] lattice_0.20-27 knitr_1.5      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] assertthat_0.1      evaluate_0.5.1      formatR_0.10       
-##  [4] grid_3.0.2          lattice_0.20-27     MASS_7.3-29        
-##  [7] minqa_1.2.3         nlme_3.1-111        RcppEigen_0.3.2.1.1
-## [10] splines_3.0.2       stringr_0.6.2       tools_3.0.2
+##  [1] assertthat_0.1     colorspace_1.2-4   dichromat_2.0-0   
+##  [4] digest_0.6.4       evaluate_0.5.1     formatR_0.10      
+##  [7] grid_3.0.2         gtable_0.1.2       labeling_0.2      
+## [10] MASS_7.3-29        minqa_1.2.3        munsell_0.4.2     
+## [13] nlme_3.1-111       plyr_1.8.1         proto_0.3-10      
+## [16] RColorBrewer_1.0-5 Rcpp_0.11.0        reshape2_1.2.2    
+## [19] scales_0.2.3       splines_3.0.2      stringr_0.6.2     
+## [22] tools_3.0.2
 ```
 
 ```r
@@ -291,7 +367,7 @@ date()
 ```
 
 ```
-## [1] "Wed Mar 26 12:09:31 2014"
+## [1] "Wed Mar 26 13:29:04 2014"
 ```
 
 
