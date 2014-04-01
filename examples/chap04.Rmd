@@ -1,3 +1,4 @@
+
 Chapter 4: The Random Intercept Model
 ===============================================================================
 
@@ -128,13 +129,11 @@ sum(emp_bayes$Lower <= upper_bound_of_min) - 1
 # These counts do not match the textbook...
 ```
 
-```{r}
-
-```
-
 
 
 *** 
+
+### Appendix
 
 ```{r}
 sessionInfo()

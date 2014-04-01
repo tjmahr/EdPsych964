@@ -1,3 +1,4 @@
+
 Chapter 4: The Random Intercept Model
 ===============================================================================
 
@@ -50,12 +51,16 @@ summary(m_1)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood ['lmerMod']
-## Formula: langPOST ~ 1 + (1 | schoolnr) 
-##    Data: d 
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ 1 + (1 | schoolnr)
+##    Data: d
 ## 
-##      AIC      BIC   logLik deviance 
-##    26601    26620   -13298    26595 
+##      AIC      BIC   logLik deviance df.resid 
+##    26601    26620   -13298    26595     3755 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.185 -0.642  0.091  0.723  2.528 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -84,12 +89,16 @@ summary(m_2)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood ['lmerMod']
-## Formula: langPOST ~ IQ_verb + (1 | schoolnr) 
-##    Data: d 
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ IQ_verb + (1 | schoolnr)
+##    Data: d
 ## 
-##      AIC      BIC   logLik deviance 
-##    24920    24945   -12456    24912 
+##      AIC      BIC   logLik deviance df.resid 
+##    24920    24945   -12456    24912     3754 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.196 -0.639  0.066  0.710  3.214 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -161,12 +170,16 @@ summary(m_3a)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood ['lmerMod']
-## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr) 
-##    Data: d 
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ IQ_verb + sch_iqv + (1 | schoolnr)
+##    Data: d
 ## 
-##      AIC      BIC   logLik deviance 
-##    24898    24929   -12444    24888 
+##      AIC      BIC   logLik deviance df.resid 
+##    24898    24929   -12444    24888     3753 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.222 -0.641  0.063  0.706  3.219 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -205,12 +218,16 @@ summary(m_3b)
 ```
 
 ```
-## Linear mixed model fit by maximum likelihood ['lmerMod']
-## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr) 
-##    Data: d 
+## Linear mixed model fit by maximum likelihood  ['lmerMod']
+## Formula: langPOST ~ dev_iqv + sch_iqv + (1 | schoolnr)
+##    Data: d
 ## 
-##      AIC      BIC   logLik deviance 
-##    24898    24929   -12444    24888 
+##      AIC      BIC   logLik deviance df.resid 
+##    24898    24929   -12444    24888     3753 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.222 -0.641  0.063  0.706  3.219 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
@@ -264,12 +281,12 @@ head(emp_bayes)
 
 ```
 ##    ID PostMean PostVar  Lower  Upper
-## 1  14   -6.717  0.2861 -7.461 -5.974
-## 2  18   -6.470  0.2293 -7.135 -5.804
-## 3  67   -5.888  0.2004 -6.510 -5.266
-## 4 107   -5.761  0.4015 -6.641 -4.880
-## 5  15   -5.317  1.1753 -6.823 -3.810
-## 6 232   -4.996  1.6579 -6.785 -3.206
+## 1  14   -6.717   1.576 -8.462 -4.972
+## 2  18   -6.470   1.411 -8.121 -4.819
+## 3  67   -5.888   1.319 -7.484 -4.292
+## 4 107   -5.761   1.867 -7.660 -3.862
+## 5  15   -5.316   3.194 -7.801 -2.832
+## 6 232   -4.995   3.793 -7.703 -2.288
 ```
 
 ```r
@@ -281,10 +298,8 @@ dotplot(ranef(m_3a, condVar = TRUE))
 ```
 
 ```
-## $schoolnr
+## Error: could not find function "dotplot"
 ```
-
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-51.png) 
 
 ```r
 # Plot the estimates collected in the data-frame
@@ -293,7 +308,7 @@ ggplot(emp_bayes, aes(x = seq_len(nrow(emp_bayes)), y = PostMean)) + geom_errorb
     axis.text.x = element_blank()) + scale_x_continuous(breaks = NULL)
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-52.png) 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 
 ```r
 ## Count how many schools overlap with the lowest and highest schools
@@ -305,7 +320,7 @@ sum(lower_bound_of_max <= emp_bayes$Upper) - 1
 ```
 
 ```
-## [1] 7
+## [1] 32
 ```
 
 ```r
@@ -313,7 +328,7 @@ sum(emp_bayes$Lower <= upper_bound_of_min) - 1
 ```
 
 ```
-## [1] 8
+## [1] 27
 ```
 
 ```r
@@ -323,10 +338,9 @@ sum(emp_bayes$Lower <= upper_bound_of_min) - 1
 
 
 
-
-
-
 *** 
+
+### Appendix
 
 
 ```r
@@ -348,18 +362,18 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] dplyr_0.1.2     ggplot2_0.9.3.1 lme4_1.0-6      Matrix_1.1-2-2 
-## [5] lattice_0.20-27 knitr_1.5      
+## [1] dplyr_0.1.3     ggplot2_0.9.3.1 lme4_1.1-5      Rcpp_0.11.1    
+## [5] Matrix_1.1-3    knitr_1.5      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] assertthat_0.1     colorspace_1.2-4   dichromat_2.0-0   
-##  [4] digest_0.6.4       evaluate_0.5.1     formatR_0.10      
-##  [7] grid_3.0.2         gtable_0.1.2       labeling_0.2      
-## [10] MASS_7.3-29        minqa_1.2.3        munsell_0.4.2     
-## [13] nlme_3.1-111       plyr_1.8.1         proto_0.3-10      
-## [16] RColorBrewer_1.0-5 Rcpp_0.11.0        reshape2_1.2.2    
-## [19] scales_0.2.3       splines_3.0.2      stringr_0.6.2     
-## [22] tools_3.0.2
+##  [1] assertthat_0.1      colorspace_1.2-4    dichromat_2.0-0    
+##  [4] digest_0.6.4        evaluate_0.5.3      formatR_0.10       
+##  [7] grid_3.0.2          gtable_0.1.2        labeling_0.2       
+## [10] lattice_0.20-27     MASS_7.3-29         minqa_1.2.3        
+## [13] munsell_0.4.2       nlme_3.1-111        plyr_1.8.1         
+## [16] proto_0.3-10        RColorBrewer_1.0-5  RcppEigen_0.3.2.1.1
+## [19] reshape2_1.2.2      scales_0.2.3        splines_3.0.2      
+## [22] stringr_0.6.2       tools_3.0.2
 ```
 
 ```r
@@ -367,7 +381,7 @@ date()
 ```
 
 ```
-## [1] "Wed Mar 26 13:29:04 2014"
+## [1] "Tue Apr 01 09:42:16 2014"
 ```
 
 
