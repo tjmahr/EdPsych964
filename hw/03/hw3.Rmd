@@ -49,6 +49,76 @@ ggplot(d, aes(x = age, y = attit, group = age)) + geom_boxplot()
 **1\. Fit a linear growth model to these data allowing for random intercepts and slopes using `age11` as the level-one predictor, and `attit` as the outcome. Of the various types of level-1 covariance structures that can be applied using the HLM software, which appears to be the best for this model? Justify your answer.**
 
 
+```{r}
+# Decide on the random effects structure
+m_rim <- lme(attit ~ age11, random = ~ 1 | id, data = d)
+summary(m_rim)
+m_rsm <-update(m_rim, random = ~ age11 | id, data = d)
+summary(m_rsm)
+anova(m_rim, m_rsm)
+```
+
+
+```{r}
+# Look at the covariance structure
+VarCorr(m_rsm)
+
+
+
+
+# example code to follow...
+
+tau00 <- as.numeric(VarCorr(RSM)[1, 1])
+tau11 <- as.numeric(VarCorr(RSM)[2, 1])
+tau10 <- as.numeric(VarCorr(RSM)[2, 3]) * sqrt(tau00 * tau11)
+(TAU <- matrix(c(tau00, tau10, tau10, tau11), ncol = 2))
+
+#         [,1]      [,2]
+#[1,] 1236.425 -178.0690
+#[2,] -178.069  107.2485
+
+
+(sigma <- summary(RSM)$sigma ^ 2)
+(design <- cbind(rep(1, nT), seq(0, nT - 1)))
+
+# design matrix for "random" effects: note that the design matrix is a vector of ones in RIM
+
+#       [,1] [,2]
+# [1,]    1    0
+# [2,]    1    1
+# [3,]    1    2
+# [4,]    1    3
+ 
+(TAU.nT <- design %*% TAU %*% t(design))
+#          [,1]      [,2]     [,3]      [,4]
+#[1,] 1236.4253 1058.3563 880.2872  702.2182
+#[2,] 1058.3563  987.5357 916.7152  845.8946
+#[3,]  880.2872  916.7152 953.1431  989.5711
+#[4,]  702.2182  845.8946 989.5711 1133.2476
+
+(SIGMA.nT <- summary(RSM)$sigma ^ 2 * diag(nT))
+
+#          [,1]     [,2]     [,3]     [,4]
+# [1,] 159.4775   0.0000   0.0000   0.0000
+# [2,]   0.0000 159.4775   0.0000   0.0000
+# [3,]   0.0000   0.0000 159.4775   0.0000
+# [4,]   0.0000   0.0000   0.0000 159.4775
+
+
+(RSM.cov <- TAU.nT + SIGMA.nT)
+#          [,1]      [,2]      [,3]      [,4]
+#[1,] 1395.9028 1058.3563  880.2872  702.2182
+#[2,] 1058.3563 1147.0132  916.7152  845.8946
+#[3,]  880.2872  916.7152 1112.6206  989.5711
+#[4,]  702.2182  845.8946  989.5711 1292.7250
+
+
+```
+
+
+
+
+
 
 
 **2\. Fit a quadratic growth model using `age11` as a predictor under the homogeneous covariance structure. Allow all of the growth parameters to be random. Report and interpret the parameter estimates. Does it appear necessary to add a quadratic term to accurately model change in attitudes toward deviant behavior?**
