@@ -1,16 +1,7 @@
-Ed. Psych. 964: HLM Assignment 3
-===============================================================================
-
-_Tristan Mahr, April 2014_
-
-
-```r
-library(dplyr)
-library(nlme)
-library(ggplot2)
-d <- read.csv("nys.csv")
-d <- select(d, -expo, -ind1, -ind2, -ind3, -ind4, -ind5)
-```
+---
+title       : Ed. Psych. 964: HLM Assignment 3
+author      : Tristan Mahr
+---
 
 
 
@@ -43,13 +34,7 @@ head(d)
 ```
 
 ```
-##   id attit age age11 age13 age11s age13s female minority income
-## 1  3  0.11  11     0    -2      0      4      1        0      3
-## 2  3  0.20  12     1    -1      1      1      1        0      3
-## 3  3  0.00  13     2     0      4      0      1        0      3
-## 4  3  0.00  14     3     1      9      1      1        0      3
-## 5  3  0.11  15     4     2     16      4      1        0      3
-## 6  8  0.29  11     0    -2      0      4      0        0      4
+## Error: object 'd' not found
 ```
 
 ```r
@@ -60,7 +45,9 @@ ggplot(d, aes(x = age, y = attit, group = id)) + stat_smooth(method = "lm",
     method = "lm", size = 1.5, se = FALSE, color = "black")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-61.png) 
+```
+## Error: could not find function "ggplot"
+```
 
 ```r
 
@@ -72,35 +59,15 @@ ggplot(d, aes(x = age, y = attit, group = id)) + stat_smooth(method = "lm",
 ```
 
 ```
-## Warning: prediction from a rank-deficient fit may be misleading
-## Warning: prediction from a rank-deficient fit may be misleading
-## Warning: prediction from a rank-deficient fit may be misleading
-## Warning: prediction from a rank-deficient fit may be misleading
-## Warning: prediction from a rank-deficient fit may be misleading
+## Error: could not find function "ggplot"
 ```
-
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-62.png) 
 
 ```r
 
 ggplot(d, aes(x = age, y = attit, group = age)) + geom_boxplot()
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-63.png) 
-
-
-
-Exercises
--------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
+```
+## Error: could not find function "ggplot"
+```
 
