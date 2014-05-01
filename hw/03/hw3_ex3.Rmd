@@ -1,0 +1,70 @@
+
+### 3\. Are `gender`, `minority`, or `income` significant predictors of the random intercepts, slopes, or quadratic terms? Interpret any significant findings.
+
+We begin by establishing a baseline model, which is the homogeneous quadratic random-slope model with fixed effects for gender and ethnicity. In this model, gender is significant and ethnicity approaches significance.
+
+```{r}
+# Baseline model
+m_fem_min <- lme(attit ~ age11 + age11s + female + minority, 
+                 random = ~ age11 + age11s | id, 
+                 data = d, method = "ML")
+summary(m_fem_min)
+```
+
+We then fit models where these level-two variables predict linear and quadratic time. None of these models were significantly different from the above model, so their summaries are not reproduced.
+
+```{r, results='hide'}
+# income: ns
+m_fem_min_inc <- update(m_fem_min, . ~ . + income)
+summary(m_fem_min_inc)
+
+# gender x slope: ns
+m_femx1_min <- update(m_fem_min, . ~ . + female:age11)
+summary(m_femx1_min)
+
+# gender x quadratic: ns
+m_femx2_min <- update(m_fem_min, . ~ . + female:age11s)
+summary(m_femx2_min)
+
+# minority x slope: ns
+m_fem_minx1 <- update(m_fem_min, . ~ . + minority:age11)
+summary(m_fem_minx1)
+
+# minority x quadratic: ns
+m_fem_minx2 <- update(m_fem_min, . ~ . + minority:age11s)
+summary(m_fem_minx2)
+```
+
+We fit a final model to allow for heterogeneous variances as well and then compare the various quadratic models.
+
+```{r}
+m_final <- update(m_quad_rsm_hetero, . ~ . + female + minority)
+anova(m_quad_rsm, m_fem_min, m_quad_rsm_hetero, m_final)
+summary(m_final)
+```
+
+In these models, gender and ethnicity does not significantly predict how attitude changes over time. These variables, however, do significantly predict baseline attitude at age 11. The following plot shows these model fits for the gender-minority groups:
+
+```{r}
+d$fits <- fitted(m_final)
+ggplot(d, aes(x = age, y = attit, color = gender, linetype = minority_status)) + 
+  geom_line(aes(group = id), alpha = .10) + 
+  stat_summary(aes(y = fits), fun.y = mean, 
+               geom = "line", size = 1) + 
+  theme_bw() + labs(x = "Age", y = "Attitude to deviant behavior", 
+                    color = "Gender", linetype = "Ethnicity")
+```
+
+```{r, echo = FALSE}
+b0a <- fixef(m_final)[1]
+b0b <- fixef(m_final)[5]
+b0c <- fixef(m_final)[4]
+```
+
+The model predicts the following baseline attitudes, from most tolerant to least tolerant:
+
+* Non-minority males: b0a = `r b0a`
+* Minority males: b0a + b0b = b0a + `r b0b` = `r b0a + b0b`
+* Non-minority females: b0a + b0c = `r b0a` + `r b0c` = `r b0a + b0c`
+* Minority females: b0a + b0b + b0c = `r b0a` + `r b0b` + `r b0c` = `r b0a + b0b + b0c`
+

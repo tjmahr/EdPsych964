@@ -1,0 +1,71 @@
+
+Preliminaries
+-------------------------------------------------------------------------------
+
+### Codebook
+
+* `id`: subject ID
+* `attit`: attitudes toward deviance (composite score). Larger values imply more tolerance toward deviant behaviors by peers (such as cheating, stealing five dollars, etc.).
+* `expo`: exposure to delinquent peers (composite score). Larger values imply more frequent contacts with delinquent peers.
+* `age`: age of subject
+* `age11`: `age` minus 11
+* `age13`: `age` minus 13
+* `age11s`: `age11` squared
+* `age13s`: `age13` squared
+* `ind1`--`ind5`: measurement indicator matrix for HLM7.  Same for `age`, `age11`, `age13`.
+* `female`: 1 if female, otherwise 0
+* `minority`: 1 if minority, otherwise 0
+* `income`: family income categories. Larger values imply higher family income.
+
+
+
+
+### First look at the data
+
+#### Descriptives
+
+```{r descriptives}
+head(d)
+as.data.frame(table(table(d$id), dnn = c("ObservationsPerSubject")))
+d$age_group <- paste0("Age_", d$age)
+d$gender <- ifelse(d$female, "female", "male")
+d$minority_status <- ifelse(d$minority, "minority", "non-minority")
+describe_briefly <- function(...) {
+  summary <- describeBy(..., digits = 3, mat = TRUE)
+  select(summary, -vars, -trimmed, -mad, -min, -max, -item)
+}
+
+# Attitude by age, gender, minority, income
+describe_briefly(d$attit, group = list(Age = d$age_group))
+describe_briefly(d$attit, group = list(d$age_group, d$gender))
+describe_briefly(d$attit, group = list(d$age_group, d$minority_status))
+describe_briefly(d$attit, group = list(d$income))
+```
+
+#### Exploratory plots
+
+```{r exploratory plots, warning = FALSE, message = FALSE}
+ggplot(d, aes(x = age, y = attit, group = age)) + geom_boxplot() + 
+  facet_grid(gender ~ minority_status)
+# Within-subject change
+alpha_blue <- "#4682B440"
+ggplot(d, aes(x = age, y = attit, group = id)) + 
+  stat_smooth(method = "lm", se = FALSE, color = alpha_blue) + 
+  stat_smooth(aes(group = NULL), method = "lm", size = 1, color = "black")
+# Within-subject change by group
+ggplot(d, aes(x = age, y = attit, color = gender, linetype = minority_status)) + 
+  facet_grid( ~ gender) + 
+  stat_smooth(aes(group = id), method = "lm", se = FALSE, size = .1) + 
+  stat_smooth(method = "lm", size = 1, color = "blue")
+```
+
+
+#### Intra-class correlation
+
+```{r ICC}
+m_empty <- lme(attit ~ 1, random = ~ 1 | id, data = d, method = "ML")
+summary(m_empty)
+cov_matrix2(m_empty)
+#  Tau / (Tau + Sigma_Squared)
+GmeanRel(m_empty)$ICC
+```

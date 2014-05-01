@@ -1,14 +1,55 @@
-Ed. Psych. 964: HLM Assignment 3
-===============================================================================
-
-_Tristan Mahr, April 2014_
+---
+title: 'Ed. Psych. 964: HLM Assignment 3'
+author: "Tristan Mahr"
+date: "April 2014"
+output:
+  html_document:
+    highlight: haddock
+    theme: readable
+  word_document:
+    fig_caption: no
+    highlight: haddock
+---
 
 ```{r session prep, warning = FALSE, message = FALSE}
-library(dplyr)
+library(psych)
 library(nlme)
+library(mgcv)
+library(multilevel)
 library(ggplot2)
+library(dplyr)
+options(knitr.tidy = FALSE)
+
+cov_matrix2 <- function(lme_model, data = d) {
+  block_diagonals <- extract.lme.cov2(lme_model, d)$V
+  which_full <- which.max(sapply(block_diagonals, nrow))
+  full_cov_mat <- block_diagonals[[which_full]]
+  full_cov_mat
+}
+
+cov_matrix <- function(gls_model) {
+  cor_matrix(gls_model) * sigma_squared(gls_model) * 
+    var_estimates(gls_model) %*% t(var_estimates(gls_model))
+}
+
+cor_matrix <- function(gls_model) { 
+  cor_mat <- corMatrix(gls_model$modelStruct$corStruct)
+  which_full <- which.max(sapply(cor_mat, nrow))
+  full_cor_mat <- cor_mat[[which_full]]
+  full_cor_mat
+}
+
+var_estimates <- function(gls_model) {
+  coefs <- coef(gls_model$modelStruct$varStruct, 
+                unconstrained = FALSE, allCoef = TRUE)
+  # Sort by name
+  coefs[sort(names(coefs))]
+}
+
+sigma_squared <- function(gls_model) gls_model$sigma ^ 2
+
 d <- read.csv("nys.csv")
-d <- select(d, -expo, -ind1, -ind2, -ind3, -ind4, -ind5)
+d <- select(d, -ind1, -ind2, -ind3, -ind4, -ind5)
 ```
 
 ```{r analysis preliminaries, child = "hw3_ex0.Rmd"}
@@ -20,11 +61,19 @@ d <- select(d, -expo, -ind1, -ind2, -ind3, -ind4, -ind5)
 Exercises
 -------------------------------------------------------------------------------
 
-```{r, child = "hw3_ex1.Rmd", eval = FALSE}
+```{r, child = "hw3_ex1.Rmd"}
 ```
 
-```{r, child = "hw3_ex2.Rmd", eval = FALSE}
+```{r, child = "hw3_ex2.Rmd"}
 ```
 
-```{r, child = "hw3_ex3.Rmd", eval = FALSE}
+```{r, child = "hw3_ex3.Rmd"}
 ```
+
+References
+-------------------------------------------------------------------------------
+
+* Mirman, D. (2014). _Growth Curve Analysis and Visualization Using R_.
+Chapman & Hall/CRC.  
+
+* Pinheiro, J. C., & Bates, D. M. (2000). _Mixed effects models in S and S-PLUS_. Springer.

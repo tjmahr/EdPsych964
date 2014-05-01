@@ -1,0 +1,52 @@
+### 1\. Fit a linear growth model to these data allowing for random intercepts and slopes using `age11` as the level-one predictor, and `attit` as the outcome. Of the various types of level-1 covariance structures, which appears to be the best for this model? Justify your answer.
+
+First we look at the least and most parameterized models.
+
+```{r}
+# Independence model
+m_indep <- gls(attit ~ age11, data = d, method = "ML")  
+invisible(summary(m_indep))
+occasions <- max(table(d$id))
+sigma_squared(m_indep) * diag(occasions)
+# Autocorrelation of the residuals
+ACF(m_indep, form = ~ 1 | id, resType = "normalized")
+# Unstructured model
+m_unstruct <- gls(attit ~ age11, data = d, 
+                  correlation = corSymm(form = ~ 1 | id), 
+                  weights = varIdent(form = ~ 1 | age11), method = "ML")
+# Much less autocorrelation
+ACF(m_unstruct, resType = "normalized")
+cov_matrix(m_unstruct)
+```
+
+Then we fit a random intercept (compound symmetry) and random-slope model, then try different variance structures on those models.
+
+```{r random-effect models}
+# Models with random effects
+m_rim <- lme(attit ~ age11, random = ~ 1 | id, data = d, method = "ML")
+m_rsm <- lme(attit ~ age11, random = ~ age11 | id, data = d, method = "ML")
+
+# RIM + autocorrelated covariances
+m_rim_ar1 <- update(m_rim, correlation = corAR1(form = ~ 1 | id))
+invisible(summary(m_rim_ar1))
+cov_matrix2(m_rim)
+cov_matrix2(m_rim_ar1)
+ACF(m_rim_ar1, resType = "normalized")
+# RSM + heterogeneous variances
+m_rsm_hetero <- update(m_rsm, weights = varIdent(form = ~ 1 | age11))
+summary(m_rsm_hetero)
+ACF(m_rsm_hetero, resType = "normalized")
+anova(m_indep, m_rim, m_rim_ar1, m_rsm, m_rsm_hetero, m_unstruct)
+```
+
+The unstructured model provides the best fit; it certainly has the smallest AIC value. The model's fit comes at the cost of increased parameters and the added work of interpreting those parameters. The random-slope model with heterogeneous variances provides the next best AIC value, and it is also much more comprehensible. This model claims:
+
+* Attitudes of 11 to 15 year olds change over time.
+* Individuals vary randomly in their baseline attitude and in the rate at which attitude changes over time. These two types of random variation are related.
+* Even when we take into account the above effects, the amount of random variation in attitude is different at each age level. 
+
+Moreover, we have to consider the goal of the modeling. For this dataset, we want to describe how attitude within-subjects changes over time, and the random effects models are geared towards this task. 
+
+> The choice between an `lme` model and a `gls` model should take into account more than just information criteria and likelihood tests. A mixed-effects model has a hierarchical structure which, in many applications, provides a more intuitive way of accounting for within-group dependency than the direct modeling of the marginal variance-covariance structure of the response in the `gls` approach. Furthermore, the mixed-effects estimation gives, as a byproduct, estimates for the random effects, which may be of interest in themselves. The `gls` model focuses on marginal inference and is more appealing when a hierarchical structure for the data is not believed to be present, or is not relevant in the analysis, and one is more interested in parameters associated with the error variance-covariance structure, as in time-series analysis and spatial statistics. (Pinheiro & Bates, 2000, pp 254--255, as quoted in slides by James H. Steiger, `http://www.statpower.net/Content/GCM/Lectures/SW07.pdf`)
+
+On these grounds---i.e., the purpose and performance of the model---the random slope model with heterogeneous variances is preferable.

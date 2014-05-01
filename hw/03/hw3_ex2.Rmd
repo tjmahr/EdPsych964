@@ -1,0 +1,73 @@
+
+### 2\. Fit a quadratic growth model using `age11` as a predictor under the homogeneous covariance structure. Allow all of the growth parameters to be random. Report and interpret the parameter estimates. Does it appear necessary to add a quadratic term to accurately model change in attitudes toward deviant behavior?
+
+```{r}
+m_quad_rsm <- lme(attit ~ age11 + age11s, 
+                  random = ~ age11 + age11s | id, d, method = "ML")
+summary(m_quad_rsm)
+# Decreased autocorrelation
+ACF(m_rsm, resType = "normalized")
+ACF(m_quad_rsm, resType = "normalized")
+VarCorr(m_quad_rsm)
+anova(m_rsm, m_quad_rsm)
+# Fixed effect of quadratic time does not improve unstructured model
+m_quad_unstruct <- update(m_unstruct, attit ~ age11 + age11s)
+invisible(summary(m_quad_unstruct))
+anova(m_unstruct, m_quad_unstruct)
+# Add quadratic time to the preferred model from Ex1
+m_quad_rsm_hetero <- update(m_quad_rsm, weights = varIdent(form = ~ 1 | age11))
+summary(m_quad_rsm_hetero)
+anova(m_rsm, m_quad_rsm, m_quad_rsm_hetero, m_unstruct, m_quad_unstruct)
+```
+
+Adding quadratic time and allowing it to randomly vary within subjects significantly improves model fit in both the homogeneous and heterogeneous random-slope models. This improvement comes at the cost of adding one fixed effect, one random-effect variance and two random-effect covariances.
+
+```{r, echo = FALSE}
+lookup <- function(x, y) as.numeric(VarCorr(m_quad_rsm)[x, y])
+b0 <- fixef(m_quad_rsm)[1]
+tau00 <- lookup(1, 1)
+sigma2 <- sigma_squared(m_quad_rsm)
+var_intercept <- tau00 + sigma2
+sd_intercept <- sqrt(var_intercept)
+
+b1 <- fixef(m_quad_rsm)[2]
+tau11 <- lookup(2, 1)
+sqrt_tau11 <- lookup(2, 2)
+tau11_range <- sqrt_tau11 * 2
+upper_b1 <- b1 + tau11_range
+lower_b1 <- b1 - tau11_range
+
+tau01 <- lookup(2, 3)
+
+b2 <- fixef(m_quad_rsm)[3]
+tau22 <- lookup(3, 1)
+sqrt_tau22 <- lookup(3, 2)
+
+b2 <- fixef(m_quad_rsm)[3]
+tau20 <- lookup(3, 3)
+tau21 <- lookup(3, 4)
+
+sqrt_tau22 <- lookup(3, 2)
+```
+
+Below are interpretations of parameter estimates in the homogeneous quadratic random-slope model: 
+
+__Intercept term__: The average attitude level at age 11 is b0 = `r b0`. Its variance is t00^2^ + s^2^ =  `r tau00` + `r sigma2` = `r var_intercept` (SD: `r sd_intercept`).
+
+__Linear term__: The average rate of change in attitude at age 11 is b1 = `r b1`. Its variance is t11^2^ = `r tau11`. The standard deviation `r sqrt_tau11` implies that 95% of subjects have age-11 growth rates between `r lower_b1` and `r upper_b1`. The random intercepts and random linear terms have a positive covariance t01 = `r tau01`, so subjects with higher attitudes have at age-11 have higher initial rates of change.
+
+__Quadratic term__: We also modeled how rates of change in attitude changed over time (accelerated/deccelerated) using quadratic time and allowing subjects to randomly vary in their change in growth rates. The average (fixed) effect of quadratic time is insignificant, b2 = `r b2`, but there is considerable variance t22^2^ = `r tau22` (SD = `r sqrt_tau22`). This random effect weakly covaries with the random intercept t20 = `r tau20` but strongly covaries with the random slope t21 = `r tau21`. This latter relationship implies that higher initial rates of change dampen more quickly over time.
+
+Even though the fixed effect of quadratic time is not significant, model-comparison (i.e., `anova`) shows that including fixed and random effects for quadratic time significantly improves model fit. Therefore we retain the quadratic time model specification.
+
+It is worth noting that the time terms in these models are not orthogonal, so the linear and quadratic time necessarily covary:
+
+> For higher-order polynomials, the individual time terms tend to be correlated. For example, as the linear time term increases, so does the quadratic time term. This kind of collinearity among predictors means that their parameter estimates cannot be evaluated independently because the predictors are trying to capture some of the same variance in the data. (Mirman, 2014, p. 47)
+
+```{r Fitted values of the quadratic RSM plus raw data, echo = FALSE, eval = FALSE}
+ggplot(d, aes(x = age11, y = attit)) + 
+  geom_line(aes(group = id), alpha = .05) + 
+  stat_summary(aes(y = fitted(m_quad_rsm)), fun.y = mean, 
+               geom = "line", size = 1) + 
+  theme_bw()
+```
