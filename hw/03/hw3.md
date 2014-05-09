@@ -12,7 +12,7 @@ output:
 ---
 
 
-```r
+```R
 library(psych)
 library(nlme)
 library(mgcv)
@@ -82,7 +82,7 @@ Preliminaries
 #### Descriptives
 
 
-```r
+```R
 head(d)
 ```
 
@@ -96,7 +96,7 @@ head(d)
 ## 6  8  0.29  0.42  11     0    -2      0      4      0        0      4
 ```
 
-```r
+```R
 as.data.frame(table(table(d$id), dnn = c("ObservationsPerSubject")))
 ```
 
@@ -109,7 +109,7 @@ as.data.frame(table(table(d$id), dnn = c("ObservationsPerSubject")))
 ## 5                      5  168
 ```
 
-```r
+```R
 d$age_group <- paste0("Age_", d$age)
 d$gender <- ifelse(d$female, "female", "male")
 d$minority_status <- ifelse(d$minority, "minority", "non-minority")
@@ -131,7 +131,7 @@ describe_briefly(d$attit, group = list(Age = d$age_group))
 ## 15 Age_15 218 0.446 0.301   0.44  1.20 0.119   -0.981 0.020
 ```
 
-```r
+```R
 describe_briefly(d$attit, group = list(d$age_group, d$gender))
 ```
 
@@ -149,7 +149,7 @@ describe_briefly(d$attit, group = list(d$age_group, d$gender))
 ## 110 Age_15   male 114 0.487 0.273  0.510  1.02 -0.277   -0.990 0.026
 ```
 
-```r
+```R
 describe_briefly(d$attit, group = list(d$age_group, d$minority_status))
 ```
 
@@ -167,7 +167,7 @@ describe_briefly(d$attit, group = list(d$age_group, d$minority_status))
 ## 110 Age_15 non-minority 175 0.460 0.301   0.44  1.20 0.128   -0.953 0.023
 ```
 
-```r
+```R
 describe_briefly(d$attit, group = list(d$income))
 ```
 
@@ -189,14 +189,14 @@ describe_briefly(d$attit, group = list(d$income))
 #### Exploratory plots
 
 
-```r
+```R
 ggplot(d, aes(x = age, y = attit, group = age)) + geom_boxplot() + 
   facet_grid(gender ~ minority_status)
 ```
 
 ![plot of chunk exploratory plots](figure/exploratory_plots1.png) 
 
-```r
+```R
 # Within-subject change
 alpha_blue <- "#4682B440"
 ggplot(d, aes(x = age, y = attit, group = id)) + 
@@ -206,7 +206,7 @@ ggplot(d, aes(x = age, y = attit, group = id)) +
 
 ![plot of chunk exploratory plots](figure/exploratory_plots2.png) 
 
-```r
+```R
 # Within-subject change by group
 ggplot(d, aes(x = age, y = attit, color = gender, linetype = minority_status)) + 
   facet_grid( ~ gender) + 
@@ -221,7 +221,7 @@ ggplot(d, aes(x = age, y = attit, color = gender, linetype = minority_status)) +
 #### Intra-class correlation
 
 
-```r
+```R
 m_empty <- lme(attit ~ 1, random = ~ 1 | id, data = d, method = "ML")
 summary(m_empty)
 ```
@@ -249,7 +249,7 @@ summary(m_empty)
 ## Number of Groups: 239
 ```
 
-```r
+```R
 cov_matrix2(m_empty)
 ```
 
@@ -262,7 +262,7 @@ cov_matrix2(m_empty)
 ## [5,] 0.03216 0.03216 0.03216 0.03216 0.07439
 ```
 
-```r
+```R
 #  Tau / (Tau + Sigma_Squared)
 GmeanRel(m_empty)$ICC
 ```
@@ -285,7 +285,7 @@ Exercises
 First we look at the least and most parameterized models.
 
 
-```r
+```R
 # Independence model
 m_indep <- gls(attit ~ age11, data = d, method = "ML")  
 invisible(summary(m_indep))
@@ -302,7 +302,7 @@ sigma_squared(m_indep) * diag(occasions)
 ## [5,] 0.0000 0.0000 0.0000 0.0000 0.0659
 ```
 
-```r
+```R
 # Autocorrelation of the residuals
 ACF(m_indep, form = ~ 1 | id, resType = "normalized")
 ```
@@ -316,7 +316,7 @@ ACF(m_indep, form = ~ 1 | id, resType = "normalized")
 ## 5   4 0.3459
 ```
 
-```r
+```R
 # Unstructured model
 m_unstruct <- gls(attit ~ age11, data = d, 
                   correlation = corSymm(form = ~ 1 | id), 
@@ -334,7 +334,7 @@ ACF(m_unstruct, resType = "normalized")
 ## 5   4 -0.0024786
 ```
 
-```r
+```R
 cov_matrix(m_unstruct)
 ```
 
@@ -351,7 +351,7 @@ cov_matrix(m_unstruct)
 Then we fit a random intercept (compound symmetry) and random-slope model, then try different variance structures on those models.
 
 
-```r
+```R
 # Models with random effects
 m_rim <- lme(attit ~ age11, random = ~ 1 | id, data = d, method = "ML")
 m_rsm <- lme(attit ~ age11, random = ~ age11 | id, data = d, method = "ML")
@@ -371,7 +371,7 @@ cov_matrix2(m_rim)
 ## [5,] 0.03394 0.03394 0.03394 0.03394 0.06624
 ```
 
-```r
+```R
 cov_matrix2(m_rim_ar1)
 ```
 
@@ -384,7 +384,7 @@ cov_matrix2(m_rim_ar1)
 ## [5,] 0.02546 0.02691 0.03067 0.04045 0.06588
 ```
 
-```r
+```R
 ACF(m_rim_ar1, resType = "normalized")
 ```
 
@@ -397,7 +397,7 @@ ACF(m_rim_ar1, resType = "normalized")
 ## 5   4 -0.14517
 ```
 
-```r
+```R
 # RSM + heterogeneous variances
 m_rsm_hetero <- update(m_rsm, weights = varIdent(form = ~ 1 | age11))
 summary(m_rsm_hetero)
@@ -439,7 +439,7 @@ summary(m_rsm_hetero)
 ## Number of Groups: 239
 ```
 
-```r
+```R
 ACF(m_rsm_hetero, resType = "normalized")
 ```
 
@@ -452,7 +452,7 @@ ACF(m_rsm_hetero, resType = "normalized")
 ## 5   4  0.06523
 ```
 
-```r
+```R
 anova(m_indep, m_rim, m_rim_ar1, m_rsm, m_rsm_hetero, m_unstruct)
 ```
 
@@ -485,7 +485,7 @@ On these grounds---i.e., the purpose and performance of the model---the random s
 ### 2\. Fit a quadratic growth model using `age11` as a predictor under the homogeneous covariance structure. Allow all of the growth parameters to be random. Report and interpret the parameter estimates. Does it appear necessary to add a quadratic term to accurately model change in attitudes toward deviant behavior?
 
 
-```r
+```R
 m_quad_rsm <- lme(attit ~ age11 + age11s, 
                   random = ~ age11 + age11s | id, d, method = "ML")
 summary(m_quad_rsm)
@@ -524,7 +524,7 @@ summary(m_quad_rsm)
 ## Number of Groups: 239
 ```
 
-```r
+```R
 # Decreased autocorrelation
 ACF(m_rsm, resType = "normalized")
 ```
@@ -538,7 +538,7 @@ ACF(m_rsm, resType = "normalized")
 ## 5   4  0.02977
 ```
 
-```r
+```R
 ACF(m_quad_rsm, resType = "normalized")
 ```
 
@@ -551,7 +551,7 @@ ACF(m_quad_rsm, resType = "normalized")
 ## 5   4 -0.002659
 ```
 
-```r
+```R
 VarCorr(m_quad_rsm)
 ```
 
@@ -564,7 +564,7 @@ VarCorr(m_quad_rsm)
 ## Residual    0.0242053 0.15558
 ```
 
-```r
+```R
 anova(m_rsm, m_quad_rsm)
 ```
 
@@ -574,7 +574,7 @@ anova(m_rsm, m_quad_rsm)
 ## m_quad_rsm     2 10 -328.2 -278.4  174.1 1 vs 2   10.16  0.0378
 ```
 
-```r
+```R
 # Fixed effect of quadratic time does not improve unstructured model
 m_quad_unstruct <- update(m_unstruct, attit ~ age11 + age11s)
 invisible(summary(m_quad_unstruct))
@@ -587,7 +587,7 @@ anova(m_unstruct, m_quad_unstruct)
 ## m_quad_unstruct     2 18 -333.3 -243.6  184.7 1 vs 2 0.01136  0.9151
 ```
 
-```r
+```R
 # Add quadratic time to the preferred model from Ex1
 m_quad_rsm_hetero <- update(m_quad_rsm, weights = varIdent(form = ~ 1 | age11))
 summary(m_quad_rsm_hetero)
@@ -632,7 +632,7 @@ summary(m_quad_rsm_hetero)
 ## Number of Groups: 239
 ```
 
-```r
+```R
 anova(m_rsm, m_quad_rsm, m_quad_rsm_hetero, m_unstruct, m_quad_unstruct)
 ```
 
@@ -676,7 +676,7 @@ It is worth noting that the time terms in these models are not orthogonal, so th
 We begin by establishing a baseline model, which is the homogeneous quadratic random-slope model with fixed effects for gender and ethnicity. In this model, gender is significant and ethnicity approaches significance.
 
 
-```r
+```R
 # Baseline model
 m_fem_min <- lme(attit ~ age11 + age11s + female + minority, 
                  random = ~ age11 + age11s | id, 
@@ -725,7 +725,7 @@ summary(m_fem_min)
 We then fit models where these level-two variables predict linear and quadratic time. None of these models were significantly different from the above model, so their summaries are not reproduced.
 
 
-```r
+```R
 # income: ns
 m_fem_min_inc <- update(m_fem_min, . ~ . + income)
 summary(m_fem_min_inc)
@@ -751,7 +751,7 @@ summary(m_fem_minx2)
 We fit a final model to allow for heterogeneous variances as well and then compare the various quadratic models.
 
 
-```r
+```R
 m_final <- update(m_quad_rsm_hetero, . ~ . + female + minority)
 anova(m_quad_rsm, m_fem_min, m_quad_rsm_hetero, m_final)
 ```
@@ -764,7 +764,7 @@ anova(m_quad_rsm, m_fem_min, m_quad_rsm_hetero, m_final)
 ## m_final               4 16 -341.1 -261.3  186.5 3 vs 4   9.857  0.0072
 ```
 
-```r
+```R
 summary(m_final)
 ```
 
@@ -815,7 +815,7 @@ summary(m_final)
 In these models, gender and ethnicity does not significantly predict how attitude changes over time. These variables, however, do significantly predict baseline attitude at age 11. The following plot shows these model fits for the gender-minority groups:
 
 
-```r
+```R
 d$fits <- fitted(m_final)
 ggplot(d, aes(x = age, y = attit, color = gender, linetype = minority_status)) + 
   geom_line(aes(group = id), alpha = .10) + 
